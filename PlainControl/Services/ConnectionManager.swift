@@ -132,7 +132,7 @@ final class ConnectionManager: ObservableObject {
 
         let sessionConfig = URLSessionConfiguration.ephemeral
         sessionConfig.timeoutIntervalForRequest = 5.0
-        let delegate = URLSessionDelegate()
+        let delegate = ConnectionHealthDelegate()
         let session = URLSession(configuration: sessionConfig, delegate: delegate, delegateQueue: nil)
 
         var request = URLRequest(url: healthURL)
@@ -196,4 +196,4 @@ final class ConnectionManager: ObservableObject {
 
 // MARK: - Basic URLSession Delegate for Health Checks
 
-private final class URLSessionDelegate: NSObject, Foundation.URLSessionDelegate {}
+private final class ConnectionHealthDelegate: NSObject, Foundation.URLSessionDelegate {}
