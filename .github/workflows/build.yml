@@ -12,8 +12,7 @@ jobs:
     name: Build
     runs-on: macos-15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -30,25 +29,31 @@ jobs:
             CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" ONLY_ACTIVE_ARCH=NO
 
-      - name: Package IPA
+      - name: Package
         run: |
           APP=$(find DerivedData -name "PlainControl.app" -type d | head -1)
           mkdir Payload && cp -R "$APP" Payload/ && zip -qr PlainControl.ipa Payload/
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: PlainControl.ipa
           path: PlainControl.ipa
           retention-days: 30
 
-      - name: Update Release
+      - name: Delete old tag
+        run: |
+          git push origin :refs/tags/latest 2>/dev/null || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: Latest Build
           tag_name: latest
-          body: Auto-built from latest master commit.
+          body: Auto-built from latest master.
           files: PlainControl.ipa
           prerelease: true
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
