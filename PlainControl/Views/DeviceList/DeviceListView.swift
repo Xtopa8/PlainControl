@@ -1,27 +1,39 @@
 import SwiftUI
-import SwiftData
 
 struct DeviceListView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \PlainDevice.lastSeen, order: .reverse) private var devices: [PlainDevice]
+    @EnvironmentObject var appState: AppState
     @State private var showAdd = false
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(devices, id: \.id) { device in
-                    DeviceRowView(
-                        device: device,
-                        status: device.isOnline ? .online : .offline,
-                        onTap: {},
-                        onDelete: {},
-                        onRename: { _ in }
-                    )
+                ForEach(onlineDevices) { device in
+                    DeviceRowView(device: device, status: .online, onTap: {
+                        appState.setActiveDevice(device)
+                    }, onDelete: { appState.removeDevice(device) }, onRename: { name in
+                        if let i = appState.devices.firstIndex(where: { $0.id == device.id }) {
+                            appState.devices[i].name = name; appState.saveDevices()
+                        }
+                    })
+                }
+                ForEach(offlineDevices) { device in
+                    DeviceRowView(device: device, status: .offline, onTap: {
+                        appState.setActiveDevice(device)
+                    }, onDelete: { appState.removeDevice(device) }, onRename: { name in
+                        if let i = appState.devices.firstIndex(where: { $0.id == device.id }) {
+                            appState.devices[i].name = name; appState.saveDevices()
+                        }
+                    })
                 }
             }
             .navigationTitle("Devices")
-            .toolbar { Button { showAdd = true } label: { Image(systemName: "plus") } }
+            .toolbar {
+                Button { showAdd = true } label: { Image(systemName: "plus") }
+            }
             .sheet(isPresented: $showAdd) { AddDeviceView() }
         }
     }
+
+    private var onlineDevices: [PlainDevice] { appState.devices.filter { $0.isOnline } }
+    private var offlineDevices: [PlainDevice] { appState.devices.filter { !$0.isOnline } }
 }

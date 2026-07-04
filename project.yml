@@ -14,7 +14,6 @@ targets:
       - PlainControl
     dependencies:
       - sdk: SwiftUI.framework
-      - sdk: SwiftData.framework
       - sdk: WebKit.framework
       - sdk: Network.framework
       - sdk: CryptoKit.framework

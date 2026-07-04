@@ -1,80 +1,70 @@
 import Foundation
 import SwiftUI
 
-/// Global application state, observable across all views.
-///
-/// Tracks the currently active device, discovery status, and
-/// global connection state for the entire app.
 @MainActor
 final class AppState: ObservableObject {
-    /// The currently selected/active device being controlled.
     @Published var activeDevice: PlainDevice?
-
-    /// Whether UDP discovery scan is currently running.
-    @Published var isScanning: Bool = false
-
-    /// Global connection state for the active device.
     @Published var connectionState: ConnectionState = .disconnected
-
-    /// Error message to display globally (e.g., as a banner).
     @Published var globalErrorMessage: String?
-
-    /// The set of online device IDs (updated by ConnectionManager health checks).
-    @Published var onlineDeviceIDs: Set<String> = []
-
-    /// Currently discovered devices during a scan session (not persisted).
+    @Published var devices: [PlainDevice] = []
     @Published var discoveredDevices: [DiscoverReply] = []
 
-    // MARK: - Computed
+    private let storageKey = "plaincontrol_devices"
 
-    /// Whether there is an active device currently connected.
-    var isConnected: Bool {
-        connectionState == .connected
+    init() { loadDevices() }
+
+    func loadDevices() {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let d = try? JSONDecoder().decode([PlainDevice].self, from: data) else { devices = []; return }
+        devices = d
     }
 
-    /// Whether the active device is in a transitional state.
-    var isTransitioning: Bool {
-        connectionState == .connecting
-    }
-
-    // MARK: - Actions
-
-    /// Clear the global error message.
-    func clearError() {
-        globalErrorMessage = nil
-    }
-
-    /// Set a global error with auto-dismiss.
-    func setError(_ message: String, dismissAfter seconds: TimeInterval = 5) {
-        globalErrorMessage = message
-        Task {
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            if globalErrorMessage == message {
-                globalErrorMessage = nil
-            }
+    func saveDevices() {
+        if let data = try? JSONEncoder().encode(devices) {
+            UserDefaults.standard.set(data, forKey: storageKey)
         }
     }
 
-    /// Add discovered devices to the current scan session.
-    func addDiscoveredDevices(_ replies: [DiscoverReply]) {
-        for reply in replies {
-            if !discoveredDevices.contains(where: { $0.id == reply.id }) {
-                discoveredDevices.append(reply)
-            }
+    func addOrUpdateDevice(_ device: PlainDevice) {
+        if let i = devices.firstIndex(where: { $0.id == device.id }) { devices[i] = device }
+        else { devices.append(device) }
+        saveDevices()
+    }
+
+    func upsertDevice(from reply: DiscoverReply) -> PlainDevice {
+        if let i = devices.firstIndex(where: { $0.id == reply.id }) {
+            var d = devices[i]; d.name = reply.name
+            if !reply.ips.isEmpty { d.ips = reply.ips }
+            d.httpsPort = reply.port; d.lastSeen = .now; d.isOnline = true
+            devices[i] = d; saveDevices(); return d
         }
+        let d = PlainDevice(from: reply); devices.append(d); saveDevices(); return d
     }
 
-    /// Clear the current scan session results.
-    func clearDiscoveredDevices() {
-        discoveredDevices.removeAll()
+    func removeDevice(_ device: PlainDevice) {
+        devices.removeAll { $0.id == device.id }
+        if activeDevice?.id == device.id { activeDevice = nil }
+        saveDevices()
     }
 
-    /// Update online status for a device.
-    func setDeviceOnline(_ deviceId: String, online: Bool) {
-        if online {
-            onlineDeviceIDs.insert(deviceId)
-        } else {
-            onlineDeviceIDs.remove(deviceId)
+    func removeDevice(id: String) {
+        devices.removeAll { $0.id == id }
+        if activeDevice?.id == id { activeDevice = nil }
+        saveDevices()
+    }
+
+    func setActiveDevice(_ device: PlainDevice) {
+        for i in devices.indices { devices[i].isActive = (devices[i].id == device.id) }
+        activeDevice = device; saveDevices()
+    }
+
+    func clearError() { globalErrorMessage = nil }
+    func setError(_ msg: String) { globalErrorMessage = msg }
+    func setDeviceOnline(_ id: String, online: Bool) {
+        if let i = devices.firstIndex(where: { $0.id == id }) {
+            devices[i].isOnline = online
+            if online { devices[i].lastSeen = .now }
+            saveDevices()
         }
     }
 }
