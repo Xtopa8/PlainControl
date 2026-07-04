@@ -1,0 +1,69 @@
+name: Build IPA
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build PlainControl IPA
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "latest-stable"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project PlainControl.xcodeproj \
+            -scheme PlainControl
+
+      - name: Build Archive
+        run: |
+          xcodebuild archive \
+            -project PlainControl.xcodeproj \
+            -scheme PlainControl \
+            -destination "generic/platform=iOS" \
+            -archivePath "build/PlainControl.xcarchive" \
+            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Export IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/PlainControl.xcarchive/Products/Applications/PlainControl.app build/Payload/
+          cd build
+          zip -r PlainControl.ipa Payload/
+          cd ..
+          rm -rf build/Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlainControl.ipa
+          path: build/PlainControl.ipa
+          retention-days: 30
+
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/PlainControl.ipa
+          generate_release_notes: true

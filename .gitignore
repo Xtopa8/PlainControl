@@ -1,0 +1,35 @@
+# Xcode
+*.xcworkspace
+!default.xcworkspace
+xcuserdata
+DerivedData/
+*.xcodeproj
+!default.xcodeproj
+*.xcuserstate
+*.xcscmblueprint
+*.xcbkptlist
+
+# Build
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+Pods/
+
+# SwiftPM
+.build/
+Package.resolved
+
+# macOS
+.DS_Store
+*.swp
+*.lock
+
+# XcodeGen
+*.xcodeproj
+
+# IDE
+.idea/
+.vscode/
