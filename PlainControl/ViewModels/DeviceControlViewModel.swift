@@ -55,7 +55,7 @@ final class DeviceControlViewModel: ObservableObject {
         // Try the connection URL
         if let url = device.connectionURL {
             deviceURL = url
-        } else if let ip = device.ips.first {
+        } else if let ip = device.getIPs().first {
             // Fallback: construct URL from first IP
             let scheme = device.httpsPort > 0 ? "https" : "http"
             let port = device.httpsPort > 0 ? device.httpsPort : device.httpPort

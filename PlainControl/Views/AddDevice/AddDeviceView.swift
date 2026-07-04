@@ -96,7 +96,7 @@ struct AddDeviceView: View {
                                 DeviceIconView(deviceType: device.deviceType)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(device.name).font(.body).fontWeight(.medium)
-                                    Text("\(device.ips.first ?? "?"):\(device.port)")
+                                    Text("\(device.getIPs().first ?? "?"):\(device.port)")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()

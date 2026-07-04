@@ -49,7 +49,7 @@ final class ConnectionManager: ObservableObject {
 
         // Find a reachable IP
         guard let reachableIP = await DeviceProber.findReachableIP(
-            ips: device.ips,
+            ips: device.getIPs(),
             port: device.httpsPort,
             timeout: 2.0
         ) else {
@@ -57,7 +57,7 @@ final class ConnectionManager: ObservableObject {
             if device.httpsPort > 0 {
                 let httpPort = device.httpsPort - 400
                 let reachableHTTP = await DeviceProber.findReachableIP(
-                    ips: device.ips,
+                    ips: device.getIPs(),
                     port: httpPort,
                     timeout: 2.0
                 )
