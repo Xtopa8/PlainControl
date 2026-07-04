@@ -24,13 +24,18 @@ jobs:
           xcodebuild build -project PlainControl.xcodeproj -scheme PlainControl \
             -sdk iphoneos -destination "generic/platform=iOS" \
             -configuration Release -derivedDataPath DerivedData \
-            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" ONLY_ACTIVE_ARCH=NO
+            -arch arm64 ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGNING_REQUIRED=YES
 
       - name: Package
         run: |
           APP=$(find DerivedData -name "PlainControl.app" -type d | head -1)
+          echo "App: $APP"
+          ls -la "$APP/PlainControl" 2>/dev/null && file "$APP/PlainControl" 2>/dev/null
           mkdir Payload && cp -R "$APP" Payload/ && zip -qr PlainControl.ipa Payload/
 
       - uses: actions/upload-artifact@v4

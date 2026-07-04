@@ -2,7 +2,7 @@ name: PlainControl
 options:
   bundleIdPrefix: com.ismartcoding.plain
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "14.0"
   generateSchemas: true
 targets:
   PlainControl:
