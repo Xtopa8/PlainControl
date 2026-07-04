@@ -28,15 +28,12 @@ jobs:
             -destination "generic/platform=iOS" \
             -configuration Release \
             -derivedDataPath DerivedData \
-            -arch arm64 \
-            ONLY_ACTIVE_ARCH=YES \
             CODE_SIGNING_REQUIRED=NO
 
       - name: Package IPA
         run: |
           APP=$(find DerivedData -name "PlainControl.app" -type d | head -1)
-          echo "App found: $APP"
-          file "$APP/PlainControl" 2>/dev/null || echo "no binary"
+          echo "App: $APP"
           mkdir Payload && cp -R "$APP" Payload/ && zip -qr PlainControl.ipa Payload/
           ls -lh PlainControl.ipa
 
