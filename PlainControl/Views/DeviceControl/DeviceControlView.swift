@@ -1,13 +1,10 @@
 import SwiftUI
-
 struct DeviceControlView: View {
-    @EnvironmentObject var appState: AppState
-
+    @EnvironmentObject var a: AppState
     var body: some View {
         Group {
-            if let device = appState.activeDevice, let url = device.connectionURL {
+            if let d = a.activeDevice, let url = d.connectionURL {
                 DeviceWebView(url: url, coordinator: WebViewCoordinator())
-                    .ignoresSafeArea(edges: [.horizontal, .bottom])
             } else {
                 VStack(spacing: 20) {
                     Image(systemName: "display").font(.system(size: 48)).foregroundStyle(.secondary)

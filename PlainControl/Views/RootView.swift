@@ -1,10 +1,12 @@
 import SwiftUI
 struct RootView: View {
-    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var a: AppState
+    @State private var tab = 0
     var body: some View {
-        VStack {
-            Text("PlainControl").font(.largeTitle)
-            Text("\(appState.devices.count) devices saved")
+        TabView(selection: $tab) {
+            DeviceListView().tabItem { Label("Devices", systemImage: "rectangle.grid.1x2") }.tag(0)
+            DeviceControlView().tabItem { Label("Control", systemImage: "display") }.tag(1)
+            SettingsView().tabItem { Label("Settings", systemImage: "gear") }.tag(2)
         }
     }
 }
