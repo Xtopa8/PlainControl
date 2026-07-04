@@ -157,11 +157,6 @@ struct DeviceListView: View {
     }
 }
 
-// Needed for older Swift versions
-extension Array {
-    var isNotEmpty: Bool { !isEmpty }
-}
-
 #Preview {
     DeviceListView()
         .environmentObject(AppState())
