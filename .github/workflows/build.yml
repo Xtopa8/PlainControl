@@ -9,7 +9,6 @@ permissions: write-all
 
 jobs:
   build:
-    name: Build
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -40,20 +39,10 @@ jobs:
           path: PlainControl.ipa
           retention-days: 30
 
-      - name: Delete old tag
-        run: |
-          git push origin :refs/tags/latest 2>/dev/null || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           name: Latest Build
           tag_name: latest
-          body: Auto-built from latest master.
           files: PlainControl.ipa
           prerelease: true
           make_latest: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
