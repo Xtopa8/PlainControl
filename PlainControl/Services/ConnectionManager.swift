@@ -1,6 +1,6 @@
 import Foundation
 import Network
-import SwiftUI
+import Combine
 
 /// Manages the lifecycle of device connections.
 ///
