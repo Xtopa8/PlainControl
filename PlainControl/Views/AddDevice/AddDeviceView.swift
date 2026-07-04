@@ -1,23 +1,21 @@
 import SwiftUI
 struct AddDeviceView: View {
-    @EnvironmentObject var a: AppState; @Environment(\.dismiss) var dismiss
-    @State private var host = ""; @State private var port = "8443"
+    @EnvironmentObject var s: AppState; @Environment(\.dismiss) var d
+    @State private var h=""; @State private var p="8443"
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Manual") {
-                    TextField("IP Address", text: $host).keyboardType(.URL).autocapitalization(.none)
-                    TextField("Port", text: $port).keyboardType(.numberPad)
-                }
-                Section { Button("Add") {
-                    if let p = Int(port), !host.isEmpty {
-                        let d = PlainDevice(id: host, name: host, ips: [host], httpsPort: p, isOnline: false)
-                        a.addDevice(d); dismiss()
+        NavigationStack{
+            Form{
+                TextField("IP",text:$h).keyboardType(.URL).autocapitalization(.none)
+                TextField("Port",text:$p).keyboardType(.numberPad)
+                Button("Add"){
+                    if let port=Int(p),!h.isEmpty{
+                        s.add(PlainDevice(id:UUID().uuidString,name:h,ip:h,port:port))
+                        d()
                     }
-                }.disabled(host.isEmpty) }
+                }.disabled(h.isEmpty)
             }
             .navigationTitle("Add Device")
-            .toolbar { Button("Cancel") { dismiss() } }
+            .toolbar{Button("Cancel"){d()}}
         }
     }
 }
