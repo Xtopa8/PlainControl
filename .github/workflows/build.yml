@@ -28,15 +28,14 @@ jobs:
             -destination "generic/platform=iOS" \
             -configuration Release \
             -derivedDataPath DerivedData \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Package IPA
+      - name: Package
         run: |
           APP=$(find DerivedData -name "PlainControl.app" -type d | head -1)
           echo "App: $APP"
+          file "$APP/PlainControl" 2>/dev/null || true
           mkdir Payload && cp -R "$APP" Payload/ && zip -qr PlainControl.ipa Payload/
           ls -lh PlainControl.ipa
 
