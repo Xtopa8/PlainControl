@@ -20,50 +20,37 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: List project files
-        run: ls -la PlainControl/ && echo "---" && find . -name "*.swift" | sort
-
-      - name: Build IPA
+      - name: Build App
         run: |
-          set -o pipefail
           xcodebuild build \
             -project PlainControl.xcodeproj \
             -scheme PlainControl \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
             -configuration Release \
+            -derivedDataPath DerivedData \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" \
-            ONLY_ACTIVE_ARCH=NO \
-            2>&1 | tee build.log
-        continue-on-error: true
+            ONLY_ACTIVE_ARCH=NO
 
-      - name: Show build errors (if any)
-        if: failure()
+      - name: Package IPA
         run: |
-          echo "=== BUILD ERRORS ==="
-          grep -E "error:|✖|BUILD FAILED" build.log || echo "No specific error found"
-          echo "=== LAST 100 LINES ==="
-          tail -100 build.log
-
-      - name: Package as IPA
-        if: success()
-        run: |
-          APP_PATH=$(find /Users/runner/Library/Developer/Xcode/DerivedData -name "PlainControl.app" -path "*/Release-iphoneos/*" 2>/dev/null | head -1)
+          APP_PATH=$(find DerivedData/Build/Products -name "PlainControl.app" -type d 2>/dev/null | head -1)
           if [ -z "$APP_PATH" ]; then
-            APP_PATH=$(find build -name "PlainControl.app" 2>/dev/null | head -1)
+            echo "ERROR: Could not find PlainControl.app"
+            find DerivedData -name "*.app" -type d 2>/dev/null
+            exit 1
           fi
-          echo "APP_PATH=$APP_PATH"
+          echo "Found: $APP_PATH"
           mkdir -p Payload
-          cp -R "$APP_PATH" Payload/ 2>/dev/null || cp -R build/Release-iphoneos/PlainControl.app Payload/ 2>/dev/null
+          cp -R "$APP_PATH" Payload/
           zip -qr PlainControl.ipa Payload/
-          ls -la PlainControl.ipa
+          ls -lh PlainControl.ipa
 
-      - name: Upload IPA Artifact
-        if: success()
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: PlainControl.ipa
