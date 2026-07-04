@@ -2,18 +2,19 @@ name: PlainControl
 options:
   bundleIdPrefix: com.ismartcoding.plain
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "15.0"
   generateSchemas: true
 
 targets:
   PlainControl:
     type: application
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "15.0"
     sources:
       - PlainControl
     dependencies:
       - sdk: SwiftUI.framework
+      - sdk: WebKit.framework
       - sdk: Foundation.framework
     settings:
       base:
