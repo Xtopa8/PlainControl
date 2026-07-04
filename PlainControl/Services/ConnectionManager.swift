@@ -25,12 +25,12 @@ final class ConnectionManager {
         appState.connectionState = .connecting
 
         guard let reachableIP = await DeviceProber.findReachableIP(
-            ips: device.getIPs(), port: device.httpsPort, timeout: 2.0
+            ips: device.ips, port: device.httpsPort, timeout: 2.0
         ) else {
             if device.httpsPort > 0 {
                 let httpPort = device.httpsPort - 400
                 let _ = await DeviceProber.findReachableIP(
-                    ips: device.getIPs(), port: httpPort, timeout: 2.0
+                    ips: device.ips, port: httpPort, timeout: 2.0
                 )
             }
             appState.connectionState = .error(.unreachable)
