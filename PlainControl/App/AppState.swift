@@ -1,5 +1,5 @@
 import SwiftUI
-@MainActor final class AppState: ObservableObject {
+final class AppState: ObservableObject {
     @Published var devices: [PlainDevice] = []
     @Published var activeDevice: PlainDevice?
     @Published var connectionState: String = "disconnected"
