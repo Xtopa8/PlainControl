@@ -15,6 +15,12 @@ targets:
     dependencies:
       - sdk: SwiftUI.framework
       - sdk: SwiftData.framework
+      - sdk: WebKit.framework
+      - sdk: Network.framework
+      - sdk: CryptoKit.framework
+      - sdk: AVFoundation.framework
+      - sdk: Security.framework
+      - sdk: Combine.framework
       - sdk: Foundation.framework
     settings:
       base:
