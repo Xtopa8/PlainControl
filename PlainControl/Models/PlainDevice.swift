@@ -31,11 +31,4 @@ struct PlainDevice: Identifiable, Codable, Equatable {
         self.isActive = isActive; self.isPaired = false
     }
 
-    init(from reply: DiscoverReply) {
-        self.init(id: reply.id, name: reply.name, ips: reply.ips,
-                  httpsPort: reply.port,
-                  httpPort: reply.port > 0 ? reply.port - 400 : 8080,
-                  deviceType: reply.deviceType, platform: reply.platform,
-                  version: reply.version, isOnline: true)
-    }
 }
