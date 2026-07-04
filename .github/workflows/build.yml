@@ -21,22 +21,24 @@ jobs:
 
       - name: Build
         run: |
-          xcodebuild build -project PlainControl.xcodeproj -scheme PlainControl \
-            -sdk iphoneos -destination "generic/platform=iOS" \
-            -configuration Release -derivedDataPath DerivedData \
-            -arch arm64 ONLY_ACTIVE_ARCH=YES \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            CODE_SIGNING_REQUIRED=YES
+          xcodebuild build \
+            -project PlainControl.xcodeproj \
+            -scheme PlainControl \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -configuration Release \
+            -derivedDataPath DerivedData \
+            -arch arm64 \
+            ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_REQUIRED=NO
 
-      - name: Package
+      - name: Package IPA
         run: |
           APP=$(find DerivedData -name "PlainControl.app" -type d | head -1)
-          echo "App: $APP"
-          ls -la "$APP/PlainControl" 2>/dev/null && file "$APP/PlainControl" 2>/dev/null
+          echo "App found: $APP"
+          file "$APP/PlainControl" 2>/dev/null || echo "no binary"
           mkdir Payload && cp -R "$APP" Payload/ && zip -qr PlainControl.ipa Payload/
+          ls -lh PlainControl.ipa
 
       - uses: actions/upload-artifact@v4
         with:
